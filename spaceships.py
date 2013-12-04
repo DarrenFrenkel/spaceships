@@ -99,6 +99,15 @@ class Ship:
     def draw(self,canvas):
         canvas.draw_image(ship_image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
 
+    def increase_ang_vel(self):
+        self.angle_vel += .2
+
+    def decrease_ang_vel(self):
+        self.angle_vel -= .2
+        
+    def keyup_ang_vel(self):
+        self.angle_vel = 0
+        
     def update(self):
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
@@ -157,7 +166,22 @@ def draw(canvas):
 # timer handler that spawns a rock    
 def rock_spawner():
     pass
-    
+
+#Keyboard Handler
+def key_handler1(key):
+    if key == simplegui.KEY_MAP['right']:
+        my_ship.increase_ang_vel()
+    elif key == simplegui.KEY_MAP['left']:
+        my_ship.decrease_ang_vel()
+        
+def key_handler2(key):
+    if key == simplegui.KEY_MAP['right']:
+         my_ship.keyup_ang_vel() 
+    elif key == simplegui.KEY_MAP['left']:
+        my_ship.keyup_ang_vel()       
+
+
+
 # initialize frame
 frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
@@ -165,10 +189,10 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
-
 # register handlers
 frame.set_draw_handler(draw)
-
+frame.set_keydown_handler(key_handler1)
+frame.set_keyup_handler(key_handler2)
 timer = simplegui.create_timer(1000.0, rock_spawner)
 
 # get things rolling
