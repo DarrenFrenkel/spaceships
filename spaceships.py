@@ -88,7 +88,7 @@ class Ship:
     def __init__(self, pos, vel, angle, image, info):
         self.pos = [pos[0],pos[1]]
         self.vel = [vel[0],vel[1]]
-        self.thrust = False
+        self.thrusters = False
         self.angle = angle
         self.angle_vel = 0
         self.image = image
@@ -97,17 +97,24 @@ class Ship:
         self.radius = info.get_radius()
         
     def draw(self,canvas):
-        canvas.draw_image(ship_image, self.image_center, self.image_size, self.pos, self.image_size, self.angle)
-
+        if self.thrusters == True:
+            canvas.draw_image(ship_image, (self.image_center[0]+90,self.image_center[1]), self.image_size, self.pos, self.image_size, self.angle)
+        else:    
+            canvas.draw_image(ship_image, (self.image_center), self.image_size, self.pos, self.image_size, self.angle)
+    
     def increase_ang_vel(self):
         self.angle_vel += .2
-
     def decrease_ang_vel(self):
         self.angle_vel -= .2
-        
     def keyup_ang_vel(self):
         self.angle_vel = 0
-        
+    
+    def thrust(self):
+        self.thrusters = True
+
+    def no_thrust(self):    
+        self.thrusters = False
+
     def update(self):
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
@@ -173,12 +180,18 @@ def key_handler1(key):
         my_ship.increase_ang_vel()
     elif key == simplegui.KEY_MAP['left']:
         my_ship.decrease_ang_vel()
-        
+
+    if key == simplegui.KEY_MAP['up']:
+        my_ship.thrust()
+
 def key_handler2(key):
     if key == simplegui.KEY_MAP['right']:
          my_ship.keyup_ang_vel() 
     elif key == simplegui.KEY_MAP['left']:
-        my_ship.keyup_ang_vel()       
+        my_ship.keyup_ang_vel()
+        
+    if key == simplegui.KEY_MAP['up']:
+        my_ship.no_thrust()     
 
 
 
@@ -187,6 +200,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
+
 a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 # register handlers
