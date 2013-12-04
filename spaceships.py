@@ -111,10 +111,10 @@ class Ship:
     
     def thrust(self):
         self.thrusters = True
-
+        ship_thrust_sound.play()
     def no_thrust(self):    
         self.thrusters = False
-
+        ship_thrust_sound.rewind()
     def update(self):
         self.pos[0] += self.vel[0]
         self.pos[1] += self.vel[1]
