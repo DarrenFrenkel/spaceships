@@ -112,13 +112,23 @@ class Ship:
     def thrust(self):
         self.thrusters = True
         ship_thrust_sound.play()
+
     def no_thrust(self):    
         self.thrusters = False
         ship_thrust_sound.rewind()
+        
     def update(self):
-        self.pos[0] += self.vel[0]
-        self.pos[1] += self.vel[1]
+        self.pos[0] = (self.pos[0] + self.vel[0]) % 800
+        self.pos[1] = (self.pos[1] + self.vel[1]) % 600
         self.angle += self.angle_vel
+        
+        self.vel[0] *= (1 -.05)
+        self.vel[1] *= (1 -.05) 
+        
+        if self.thrusters == True:
+            forward = angle_to_vector(self.angle)
+            self.vel[0] += forward[0]  * .7
+            self.vel[1] += forward[1]  * .7	
         pass
     
     
