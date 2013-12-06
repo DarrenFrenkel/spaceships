@@ -98,9 +98,9 @@ class Ship:
         
     def draw(self,canvas):
         if self.thrusters == True:
-            canvas.draw_image(ship_image, (self.image_center[0]+90,self.image_center[1]), self.image_size, self.pos, self.image_size, self.angle)
+            canvas.draw_image(self.image, (self.image_center[0]+90,self.image_center[1]), self.image_size, self.pos, self.image_size, self.angle)
         else:    
-            canvas.draw_image(ship_image, (self.image_center), self.image_size, self.pos, self.image_size, self.angle)
+            canvas.draw_image(self.image, (self.image_center), self.image_size, self.pos, self.image_size, self.angle)
     
     def increase_ang_vel(self):
         self.angle_vel += .2
@@ -120,6 +120,7 @@ class Ship:
     def update(self):
         self.pos[0] = (self.pos[0] + self.vel[0]) % 800
         self.pos[1] = (self.pos[1] + self.vel[1]) % 600
+        
         self.angle += self.angle_vel
         
         self.vel[0] *= (1 -.05)
@@ -129,7 +130,6 @@ class Ship:
             forward = angle_to_vector(self.angle)
             self.vel[0] += forward[0]  * .7
             self.vel[1] += forward[1]  * .7	
-        pass
     
     
 # Sprite class
@@ -151,11 +151,11 @@ class Sprite:
             sound.play()
    
     def draw(self, canvas):
-        canvas.draw_circle(self.pos, self.radius, 1, "Red", "Red")
+        canvas.draw_image(self.image, (self.image_center), self.image_size, self.pos, self.image_size, self.angle)
     
     def update(self):
-        
-        pass        
+        self.angle += self.angle_vel
+      
 
            
 def draw(canvas):
@@ -211,7 +211,8 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 
-a_rock = Sprite([WIDTH / 3, HEIGHT / 3], [1, 1], 0, 0, asteroid_image, asteroid_info)
+a_rock = Sprite([WIDTH / 4, HEIGHT / 4], [1, 1], 0, 0, asteroid_image, asteroid_info)
+
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
 # register handlers
 frame.set_draw_handler(draw)
