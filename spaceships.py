@@ -155,7 +155,8 @@ class Sprite:
     
     def update(self):
         self.angle += self.angle_vel
-      
+        self.pos[0] = (self.pos[0] + self.vel[0]) % 800
+        self.pos[1] = (self.pos[1] + self.vel[1]) % 600      
 
            
 def draw(canvas):
@@ -182,8 +183,11 @@ def draw(canvas):
             
 # timer handler that spawns a rock    
 def rock_spawner():
-    pass
-
+    global a_rock
+    
+   # a_rock = Sprite([pos[0], pos[1]], [1, 1], 0, .1, asteroid_image, asteroid_info)
+    
+    
 #Keyboard Handler
 def key_handler1(key):
     if key == simplegui.KEY_MAP['right']:
