@@ -135,20 +135,15 @@ class Ship:
             self.vel[0] += forward[0]  * .7
             self.vel[1] += forward[1]  * .7	
         
-        
-        if shoot == True:
-            a_missile.pos[0] = (self.pos[0] + (self.radius * math.cos(self.angle)) + a_missile.vel[0])% 800
-            a_missile.pos[1] = (self.pos[1] + (self.radius * math.sin(self.angle)) + a_missile.vel[1])% 600 
-
-            a_missile.vel[0] =  self.radius * math.cos(self.angle)* .5 + self.vel[0]    * .8
-            a_missile.vel[1] =  self.radius * math.sin(self.angle) * .5 + self.vel[1] * .8
-            print a_missile.pos[0]
-
     def shoot(self):
         global a_missile
-        a_missile = Sprite([self.pos[0] + self.radius * math.cos(self.angle)  + a_missile.vel[0]% 800,
-                            self.pos[1] + self.radius * math.sin(self.angle) + a_missile.vel[1] % 600], 
-                           [0,0], self.angle, self.angle_vel, missile_image, missile_info, missile_sound)
+        forward = angle_to_vector(self.angle)
+        vel = [self.radius * forward[0]* .3 + self.vel[0]    * .5,
+            self.radius * forward[1] * .3 + self.vel[1] * .5]
+        
+        a_missile = Sprite([self.pos[0] + self.radius * forward[0],
+                            self.pos[1] + self.radius * forward[1]], 
+                           vel, self.angle, self.angle_vel, missile_image, missile_info, missile_sound)
                 
     
     
@@ -200,10 +195,14 @@ def draw(canvas):
     my_ship.update()
     a_rock.update()
     a_missile.update()
+    
+    # draws score and lives
+    canvas.draw_text("Score: " +str(score), (WIDTH - 130,43), 30, "Green")
+    canvas.draw_text("Lives: " +str(lives), (30,43), 30, "Green")
             
 # timer handler that spawns a rock    
 def rock_spawner():
-
+    global a_rock
     asteroid_pos = [0,0]
     asteroid_pos[0] = random.randrange(0,801)
     asteroid_pos[1] = random.randrange(0,601)
@@ -218,8 +217,6 @@ def rock_spawner():
         angle_vel = random.randrange(1,5)/10.0
     
     a_rock = Sprite([asteroid_pos[0], asteroid_pos[1]], [asteroid_vel[0],asteroid_vel[1]], 0, angle_vel, asteroid_image, asteroid_info)
-
-    
     
     
 #Keyboard Handler
@@ -235,7 +232,7 @@ def key_handler1(key):
     
     if key == simplegui.KEY_MAP['space']:
         my_ship.shoot()
-        shoot = True
+
 
 def key_handler2(key):
     global shoot
@@ -247,8 +244,6 @@ def key_handler2(key):
     if key == simplegui.KEY_MAP['up']:
         my_ship.no_thrust() 
         
-    if key == simplegui.KEY_MAP['space']:
-        shoot = False    
 
 
 
@@ -272,3 +267,5 @@ timer = simplegui.create_timer(1000.0, rock_spawner)
 # get things rolling
 timer.start()
 frame.start()
+
+
