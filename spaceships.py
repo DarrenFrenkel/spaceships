@@ -203,7 +203,7 @@ def draw(canvas):
             
 # timer handler that spawns a rock    
 def rock_spawner():
-    global a_rock
+
     asteroid_pos = [0,0]
     asteroid_pos[0] = random.randrange(0,801)
     asteroid_pos[1] = random.randrange(0,601)
@@ -218,6 +218,8 @@ def rock_spawner():
         angle_vel = random.randrange(1,5)/10.0
     
     a_rock = Sprite([asteroid_pos[0], asteroid_pos[1]], [asteroid_vel[0],asteroid_vel[1]], 0, angle_vel, asteroid_image, asteroid_info)
+
+    
     
     
 #Keyboard Handler
