@@ -9,6 +9,8 @@ HEIGHT = 600
 score = 0
 lives = 3
 time = 0.5
+shoot = False
+
 
 class ImageInfo:
     def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
@@ -118,6 +120,8 @@ class Ship:
         ship_thrust_sound.rewind()
         
     def update(self):
+
+        
         self.pos[0] = (self.pos[0] + self.vel[0]) % 800
         self.pos[1] = (self.pos[1] + self.vel[1]) % 600
         
@@ -130,6 +134,22 @@ class Ship:
             forward = angle_to_vector(self.angle)
             self.vel[0] += forward[0]  * .7
             self.vel[1] += forward[1]  * .7	
+        
+        
+        if shoot == True:
+            a_missile.pos[0] = (self.pos[0] + (self.radius * math.cos(self.angle)) + a_missile.vel[0])% 800
+            a_missile.pos[1] = (self.pos[1] + (self.radius * math.sin(self.angle)) + a_missile.vel[1])% 600 
+
+            a_missile.vel[0] =  self.radius * math.cos(self.angle)* .5 + self.vel[0]    * .8
+            a_missile.vel[1] =  self.radius * math.sin(self.angle) * .5 + self.vel[1] * .8
+            print a_missile.pos[0]
+
+    def shoot(self):
+        global a_missile
+        a_missile = Sprite([self.pos[0] + self.radius * math.cos(self.angle)  + a_missile.vel[0]% 800,
+                            self.pos[1] + self.radius * math.sin(self.angle) + a_missile.vel[1] % 600], 
+                           [0,0], self.angle, self.angle_vel, missile_image, missile_info, missile_sound)
+                
     
     
 # Sprite class
@@ -184,12 +204,25 @@ def draw(canvas):
 # timer handler that spawns a rock    
 def rock_spawner():
     global a_rock
+    asteroid_pos = [0,0]
+    asteroid_pos[0] = random.randrange(0,801)
+    asteroid_pos[1] = random.randrange(0,601)
+    asteroid_vel = [0,0]
+    asteroid_vel[0] = random.randrange(-2,3)
+    asteroid_vel[1] = random.randrange(-2,3)
     
-   # a_rock = Sprite([pos[0], pos[1]], [1, 1], 0, .1, asteroid_image, asteroid_info)
+    flag = random.choice( [True,False])
+    if flag == True:
+        angle_vel = - random.randrange(1,5)/10.0
+    else:
+        angle_vel = random.randrange(1,5)/10.0
+    
+    a_rock = Sprite([asteroid_pos[0], asteroid_pos[1]], [asteroid_vel[0],asteroid_vel[1]], 0, angle_vel, asteroid_image, asteroid_info)
     
     
 #Keyboard Handler
 def key_handler1(key):
+    global shoot
     if key == simplegui.KEY_MAP['right']:
         my_ship.increase_ang_vel()
     elif key == simplegui.KEY_MAP['left']:
@@ -197,15 +230,23 @@ def key_handler1(key):
 
     if key == simplegui.KEY_MAP['up']:
         my_ship.thrust()
+    
+    if key == simplegui.KEY_MAP['space']:
+        my_ship.shoot()
+        shoot = True
 
 def key_handler2(key):
+    global shoot
     if key == simplegui.KEY_MAP['right']:
          my_ship.keyup_ang_vel() 
     elif key == simplegui.KEY_MAP['left']:
         my_ship.keyup_ang_vel()
         
     if key == simplegui.KEY_MAP['up']:
-        my_ship.no_thrust()     
+        my_ship.no_thrust() 
+        
+    if key == simplegui.KEY_MAP['space']:
+        shoot = False    
 
 
 
@@ -215,9 +256,11 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 
-a_rock = Sprite([WIDTH / 4, HEIGHT / 4], [1, 1], 0, 0, asteroid_image, asteroid_info)
+a_rock = Sprite([WIDTH / 4, HEIGHT / 4], [1, 1], 0, 0.1, asteroid_image, asteroid_info)
 
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [-1,1], 0, 0, missile_image, missile_info, missile_sound)
+a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [0,0], 0, 0, missile_image, missile_info, missile_sound)
+
+
 # register handlers
 frame.set_draw_handler(draw)
 frame.set_keydown_handler(key_handler1)
