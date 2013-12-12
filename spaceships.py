@@ -10,6 +10,8 @@ score = 0
 lives = 3
 time = 0.5
 shoot = False
+rock_group = set([])
+rock_group_size = 0 
 
 
 class ImageInfo:
@@ -188,13 +190,15 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-    a_rock.draw(canvas)
+
     a_missile.draw(canvas)
     
     # update ship and sprites
     my_ship.update()
-    a_rock.update()
     a_missile.update()
+    
+    #draws rocks on canvas
+    process_sprite_group(rock_group,canvas)
     
     # draws score and lives
     canvas.draw_text("Score: " +str(score), (WIDTH - 130,43), 30, "Green")
@@ -202,7 +206,9 @@ def draw(canvas):
             
 # timer handler that spawns a rock    
 def rock_spawner():
-    global a_rock
+    '''creates the rock sprite at a random position, velocity and ang_vel. 
+    Also adds the rock sprite to rock_group set and limits the set to 12 values'''
+    global rock_group
     asteroid_pos = [0,0]
     asteroid_pos[0] = random.randrange(0,801)
     asteroid_pos[1] = random.randrange(0,601)
@@ -212,13 +218,25 @@ def rock_spawner():
     
     flag = random.choice( [True,False])
     if flag == True:
-        angle_vel = - random.randrange(1,5)/10.0
+        angle_vel = - random.random()/10.0
     else:
-        angle_vel = random.randrange(1,5)/10.0
+        angle_vel = random.random()/10.0   
     
-    a_rock = Sprite([asteroid_pos[0], asteroid_pos[1]], [asteroid_vel[0],asteroid_vel[1]], 0, angle_vel, asteroid_image, asteroid_info)
+    rock = Sprite([asteroid_pos[0], asteroid_pos[1]], [asteroid_vel[0],asteroid_vel[1]], 0, angle_vel, asteroid_image, asteroid_info)
     
+    if len(rock_group) < 12:
+        rock_group.add(rock)
+   
+
     
+def process_sprite_group(set,canvas):
+    '''Helper function that calls the draws & updates 
+    methods for all sprites in a set'''
+    for sprite in set:
+        sprite.update()
+        sprite.draw(canvas)
+
+
 #Keyboard Handler
 def key_handler1(key):
     global shoot
@@ -253,7 +271,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
 
-a_rock = Sprite([WIDTH / 4, HEIGHT / 4], [1, 1], 0, 0.1, asteroid_image, asteroid_info)
+#rock_group = Sprite([WIDTH / 4, HEIGHT / 4], [1, 1], 0, 0.1, asteroid_image, asteroid_info)
 
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [0,0], 0, 0, missile_image, missile_info, missile_sound)
 
