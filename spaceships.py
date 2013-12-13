@@ -8,6 +8,7 @@ WIDTH = 800
 HEIGHT = 600
 score = 0
 lives = 3
+control_lives = False
 time = 0.5
 shoot = False
 rock_group = set([])
@@ -174,8 +175,6 @@ class Sprite:
         self.angle += self.angle_vel
         self.pos[0] = (self.pos[0] + self.vel[0]) % 800
         self.pos[1] = (self.pos[1] + self.vel[1]) % 600
-        self.radius
-        self.image_center
         
     def collision(self, other_object):
        '''Checks if objects are colliding, if yes returns true if no returns false'''
@@ -188,7 +187,7 @@ class Sprite:
         return self.pos
            
 def draw(canvas):
-    global time
+    global time, lives, control_lives
     
     # animiate background
     time += 1
@@ -201,8 +200,7 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-
-    a_missile.draw(canvas)
+	a_missile.draw(canvas)
     
     # update ship and sprites
     my_ship.update()
@@ -214,8 +212,12 @@ def draw(canvas):
     # draws score and lives
     canvas.draw_text("Score: " +str(score), (WIDTH - 130,43), 30, "Green")
     canvas.draw_text("Lives: " +str(lives), (30,43), 30, "Green")
-    
+
+	# Removes rocks from canvas if ship & rock collide and removes a live if there is a collision	
     group_collide(rock_group, my_ship)
+	if control_lives == True:
+        lives -= 1
+        control_lives = False
   
             
 # timer handler that spawns a rock    
@@ -257,10 +259,15 @@ def distance(object1, object2):
 
 def group_collide(group, other_object):
     '''Removes the the rock that just collided with a rocket or ship'''
+    global control_lives
     for object in set(group):
         remove = object.collision(other_object)
         if remove == True:
             group.remove(object)
+            control_lives = True
+
+            
+
 
 #Keyboard Handler
 def key_handler1(key):
