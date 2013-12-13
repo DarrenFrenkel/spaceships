@@ -122,8 +122,6 @@ class Ship:
         ship_thrust_sound.rewind()
         
     def update(self):
-
-        
         self.pos[0] = (self.pos[0] + self.vel[0]) % 800
         self.pos[1] = (self.pos[1] + self.vel[1]) % 600
         
@@ -135,7 +133,7 @@ class Ship:
         if self.thrusters == True:
             forward = angle_to_vector(self.angle)
             self.vel[0] += forward[0]  * .7
-            self.vel[1] += forward[1]  * .7	
+            self.vel[1] += forward[1]  * .7	 
         
     def shoot(self):
         global a_missile
@@ -148,6 +146,8 @@ class Ship:
                            vel, self.angle, self.angle_vel, missile_image, missile_info, missile_sound)
                 
     
+    def get_pos(self):
+        return self.pos
     
 # Sprite class
 class Sprite:
@@ -173,8 +173,19 @@ class Sprite:
     def update(self):
         self.angle += self.angle_vel
         self.pos[0] = (self.pos[0] + self.vel[0]) % 800
-        self.pos[1] = (self.pos[1] + self.vel[1]) % 600      
-
+        self.pos[1] = (self.pos[1] + self.vel[1]) % 600
+        self.radius
+        self.image_center
+        
+    def collision(self, other_object):
+       '''Checks if objects are colliding, if yes returns true if no returns false'''
+       if self.radius + other_object.radius > distance(self.get_pos(), other_object.get_pos()):
+            return True
+       else:
+            return False
+            
+    def get_pos(self):
+        return self.pos
            
 def draw(canvas):
     global time
@@ -203,6 +214,9 @@ def draw(canvas):
     # draws score and lives
     canvas.draw_text("Score: " +str(score), (WIDTH - 130,43), 30, "Green")
     canvas.draw_text("Lives: " +str(lives), (30,43), 30, "Green")
+    
+    group_collide(rock_group, my_ship)
+  
             
 # timer handler that spawns a rock    
 def rock_spawner():
@@ -235,7 +249,18 @@ def process_sprite_group(set,canvas):
     for sprite in set:
         sprite.update()
         sprite.draw(canvas)
+        
+def distance(object1, object2):
+    '''Helper function that finds the distance between two objects'''
+    dist = math.sqrt((object1[0] - object2[0]) ** 2 + (object1[1] - object2[1]) ** 2) 
+    return dist
 
+def group_collide(group, other_object):
+    '''Removes the the rock that just collided with a rocket or ship'''
+    for object in set(group):
+        remove = object.collision(other_object)
+        if remove == True:
+            group.remove(object)
 
 #Keyboard Handler
 def key_handler1(key):
@@ -270,9 +295,6 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-
-#rock_group = Sprite([WIDTH / 4, HEIGHT / 4], [1, 1], 0, 0.1, asteroid_image, asteroid_info)
-
 a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [0,0], 0, 0, missile_image, missile_info, missile_sound)
 
 
@@ -285,5 +307,4 @@ timer = simplegui.create_timer(1000.0, rock_spawner)
 # get things rolling
 timer.start()
 frame.start()
-
 
