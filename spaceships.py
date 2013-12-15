@@ -11,8 +11,10 @@ lives = 3
 time = 0.5
 shoot = False
 rock_group = set([])
+missile_group = set([])
 rock_group_size = 0 
-
+disgard_missile = False
+points = 0
 
 class ImageInfo:
     def __init__(self, center, size, radius = 0, lifespan = None, animated = False):
@@ -61,7 +63,7 @@ ship_info = ImageInfo([45, 45], [90, 90], 35)
 ship_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/double_ship.png")
 
 # missile image - shot1.png, shot2.png, shot3.png
-missile_info = ImageInfo([5,5], [10, 10], 3, 50)
+missile_info = ImageInfo([5,5], [10, 10], 3, 35)
 missile_image = simplegui.load_image("http://commondatastorage.googleapis.com/codeskulptor-assets/lathrop/shot2.png")
 
 # asteroid images - asteroid_blue.png, asteroid_brown.png, asteroid_blend.png
@@ -136,7 +138,7 @@ class Ship:
             self.vel[1] += forward[1]  * .7	 
         
     def shoot(self):
-        global a_missile
+        global missile_group, a_missile
         forward = angle_to_vector(self.angle)
         vel = [self.radius * forward[0]* .3 + self.vel[0]    * .5,
             self.radius * forward[1] * .3 + self.vel[1] * .5]
@@ -144,8 +146,10 @@ class Ship:
         a_missile = Sprite([self.pos[0] + self.radius * forward[0],
                             self.pos[1] + self.radius * forward[1]], 
                            vel, self.angle, self.angle_vel, missile_image, missile_info, missile_sound)
-                
-    
+   
+        missile_group.add(a_missile)
+
+        
     def get_pos(self):
         return self.pos
     
@@ -174,6 +178,12 @@ class Sprite:
         self.angle += self.angle_vel
         self.pos[0] = (self.pos[0] + self.vel[0]) % 800
         self.pos[1] = (self.pos[1] + self.vel[1]) % 600
+        self.age += 1
+        
+        if self.age < self.lifespan:
+            return False
+        else:
+            return True
         
     def collision(self, other_object):
        '''Checks if objects are colliding, if yes returns true if no returns false'''
@@ -186,7 +196,7 @@ class Sprite:
         return self.pos
            
 def draw(canvas):
-    global time, lives
+    global time, lives, rock_group, missile_group, score
     
     # animiate background
     time += 1
@@ -199,24 +209,29 @@ def draw(canvas):
 
     # draw ship and sprites
     my_ship.draw(canvas)
-	a_missile.draw(canvas)
+
     
+
     # update ship and sprites
     my_ship.update()
-    a_missile.update()
+
     
     #draws rocks on canvas
     process_sprite_group(rock_group,canvas)
+    process_sprite_group(missile_group,canvas)
+    
     
     # draws score and lives
     canvas.draw_text("Score: " +str(score), (WIDTH - 130,43), 30, "Green")
     canvas.draw_text("Lives: " +str(lives), (30,43), 30, "Green")
 
-	# Removes rocks from canvas if ship & rock collide and removes a live if there is a collision	
-    group_collide(rock_group, my_ship)
+    # Removes rocks from canvas if ship & rock collide and removes a live if there is a collision	
+    game_lives = group_collide(rock_group, my_ship) 
+    if game_lives == True:
+        lives -= 1
 
-  
-            
+    game_score = group_group_collide(missile_group, rock_group)    
+    score = game_score * 10        
 # timer handler that spawns a rock    
 def rock_spawner():
     '''creates the rock sprite at a random position, velocity and ang_vel. 
@@ -240,6 +255,7 @@ def rock_spawner():
     if len(rock_group) < 12:
         rock_group.add(rock)
    
+    
 
     
 def process_sprite_group(set,canvas):
@@ -248,6 +264,12 @@ def process_sprite_group(set,canvas):
     for sprite in set:
         sprite.update()
         sprite.draw(canvas)
+   
+    for sprite in list(set):
+        if sprite.update() == True:
+            set.remove(sprite)
+        
+        
         
 def distance(object1, object2):
     '''Helper function that finds the distance between two objects'''
@@ -256,14 +278,28 @@ def distance(object1, object2):
 
 def group_collide(group, other_object):
     '''Removes the the rock that just collided with a rocket or ship and minuses a life after collision'''
-    global lives
+    value = False
     for object in set(group):
-        remove = object.collision(other_object)
-        if remove == True:
+        if object.collision(other_object) == True:
             group.remove(object)
-            lives -= 1
+            value = True        
+    return value   
 
+
+def group_group_collide(group1, group2):
+    global points
+    for objects in set(group1):
+        var = group_collide(group2, objects)
+        if var == True:
+            group1.discard(objects)
+            points += 1
+    return points        
+                
+
+      
+        
             
+
 
 
 #Keyboard Handler
@@ -299,7 +335,7 @@ frame = simplegui.create_frame("Asteroids", WIDTH, HEIGHT)
 
 # initialize ship and two sprites
 my_ship = Ship([WIDTH / 2, HEIGHT / 2], [0, 0], 0, ship_image, ship_info)
-a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [0,0], 0, 0, missile_image, missile_info, missile_sound)
+#a_missile = Sprite([2 * WIDTH / 3, 2 * HEIGHT / 3], [0,0], 0, 0, missile_image, missile_info, missile_sound)
 
 
 # register handlers
@@ -311,4 +347,3 @@ timer = simplegui.create_timer(1000.0, rock_spawner)
 # get things rolling
 timer.start()
 frame.start()
-
